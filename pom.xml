@@ -5,11 +5,11 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.0.3</version>
+        <version>2.7.7</version>
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
     <groupId>me.safgbad</groupId>
-    <artifactId>calendar</artifactId>
+    <artifactId>hh-school-spring-calendar</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <name>hh-school-spring-calendar</name>
     <description>hh-school-spring-calendar</description>
@@ -21,6 +21,18 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
         </dependency>
+
+        <dependency>
+            <groupId>org.postgresql</groupId>
+            <artifactId>postgresql</artifactId>
+            <version>42.5.4</version>
+        </dependency>
+        <dependency>
+            <groupId>org.hibernate</groupId>
+            <artifactId>hibernate-core</artifactId>
+            <version>5.4.0.Final</version>
+        </dependency>
+
 
         <dependency>
             <groupId>org.projectlombok</groupId>
