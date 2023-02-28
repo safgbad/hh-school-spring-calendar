@@ -9,12 +9,12 @@ import org.springframework.stereotype.Component;
 import java.util.List;
 
 @Component
-public class CalendarDao {
+public class TaskDao {
 
   private final SessionFactory sessionFactory;
 
   @Autowired
-  public CalendarDao(SessionFactory sessionFactory) {
+  public TaskDao(SessionFactory sessionFactory) {
     this.sessionFactory = sessionFactory;
   }
 

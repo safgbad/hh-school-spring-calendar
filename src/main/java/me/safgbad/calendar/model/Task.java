@@ -14,15 +14,12 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 
 @Entity
 @Getter
 @Setter
 @NoArgsConstructor
 public class Task {
-
-  public static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm");
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)

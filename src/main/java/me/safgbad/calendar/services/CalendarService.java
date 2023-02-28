@@ -1,12 +1,17 @@
 package me.safgbad.calendar.services;
 
+import me.safgbad.calendar.dto.DistributionDto;
 import me.safgbad.calendar.dto.TaskDto;
-import me.safgbad.calendar.model.Task;
+
+import java.util.List;
+import java.util.Map;
 
 public interface CalendarService {
   void addTask(TaskDto taskDto);
 
-  Task getTask(Long id);
+  TaskDto getTask(Long id);
+
+  Map<String, List<TaskDto>> getTasks(DistributionDto distributionDto);
 
   void updateTask(TaskDto taskDto, Long id);
 
