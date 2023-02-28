@@ -37,6 +37,7 @@ public class ConvertUtils {
 
   public static TaskDto getDtoFromTask(Task task) {
     return new TaskDto(
+        task.getId(),
         task.getSummary(),
         task.getDescription(),
         task.getRepeatability().name(),
