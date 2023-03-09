@@ -6,61 +6,57 @@ import me.safgbad.calendar.dto.TaskDto;
 import me.safgbad.calendar.model.Task;
 import me.safgbad.calendar.services.CalendarService;
 import me.safgbad.calendar.util.ConvertUtils;
-import me.safgbad.calendar.util.TransactionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
-import java.util.Objects;
+import java.util.Optional;
 
 @Service
 public class CalendarServiceImpl implements CalendarService {
 
   private final TaskDao taskDao;
-  private final TransactionUtils transactionUtils;
 
   @Value("${calendar.number.of.days.ahead}")
   private int numberOfDaysAhead;
 
   @Autowired
-  public CalendarServiceImpl(TaskDao taskDao,
-                             TransactionUtils transactionUtils) {
+  public CalendarServiceImpl(TaskDao taskDao) {
     this.taskDao = taskDao;
-    this.transactionUtils = transactionUtils;
   }
 
   @Override
+  @Transactional
   public void addTask(TaskDto taskDto) {
     Task task = ConvertUtils.getTaskFromDto(taskDto);
-    transactionUtils.inTransaction(() -> {
-      task.setCreationTime(LocalDateTime.now());
-      task.setIsActive(Objects.requireNonNullElse(task.getIsActive(), true));
-      taskDao.save(task);
-    });
+    taskDao.save(task);
   }
 
   @Override
+  @Transactional
   public TaskDto getTask(Long id) {
-    return ConvertUtils.getDtoFromTask(
-        transactionUtils.inTransaction(() -> taskDao.get(id)));
+    Task foundTask = Optional.ofNullable(taskDao.get(id))
+        .orElseThrow(NoSuchElementException::new);
+
+    return ConvertUtils.getDtoFromTask(foundTask);
   }
 
   @Override
+  @Transactional
   public Map<String, List<TaskDto>> getTasks(DistributionDto distributionDto) {
-    LocalDate dateFrom = ConvertUtils.getDateFromDto(distributionDto.getDateFrom());
-    LocalDate dateTo = ConvertUtils.getDateFromDto(distributionDto.getDateTo());
+    LocalDate dateFrom = distributionDto.getDateFrom();
+    LocalDate dateTo = distributionDto.getDateTo();
     if (dateTo != null && dateFrom != null && dateTo.isBefore(dateFrom)) {
-      throw new IllegalArgumentException();
+      throw new IllegalArgumentException("dateTo should be after dateFrom");
     }
-    List<Task> allTasks = transactionUtils.inTransaction(()
-        -> taskDao.getAll(distributionDto.getIsActive()));
+    List<Task> allTasks = taskDao.getAll(distributionDto.getIsActive());
     if (dateFrom == null) {
       dateFrom = allTasks.stream()
           .map(task -> task.getTaskTime().toLocalDate())
@@ -91,40 +87,28 @@ public class CalendarServiceImpl implements CalendarService {
   }
 
   @Override
+  @Transactional
   public void updateTask(TaskDto taskDto, Long id) {
     Task task = ConvertUtils.getTaskFromDto(taskDto);
-    transactionUtils.inTransaction(() -> {
-      Task foundTask = taskDao.get(id);
-      if (foundTask == null) {
-        throw new NoSuchElementException();
-      }
-      foundTask.setSummary(Objects.requireNonNullElse(
-          task.getSummary(),
-          foundTask.getSummary()));
-      foundTask.setDescription(Objects.requireNonNullElse(
-          task.getDescription(),
-          foundTask.getDescription()));
-      foundTask.setRepeatability(Objects.requireNonNullElse(
-          task.getRepeatability(),
-          foundTask.getRepeatability()));
-      foundTask.setTaskTime(Objects.requireNonNullElse(
-          task.getTaskTime(),
-          foundTask.getTaskTime()));
-      foundTask.setIsActive(Objects.requireNonNullElse(
-          task.getIsActive(),
-          foundTask.getIsActive()));
-      taskDao.save(foundTask);
-    });
+    Task foundTask = taskDao.get(id);
+    if (foundTask == null) {
+      throw new NoSuchElementException();
+    }
+    Optional.ofNullable(task.getSummary()).ifPresent(foundTask::setSummary);
+    Optional.ofNullable(task.getDescription()).ifPresent(foundTask::setDescription);
+    Optional.ofNullable(task.getRepeatability()).ifPresent(foundTask::setRepeatability);
+    Optional.ofNullable(task.getTaskTime()).ifPresent(foundTask::setTaskTime);
+    Optional.ofNullable(task.getIsActive()).ifPresent(foundTask::setIsActive);
+    taskDao.save(foundTask);
   }
 
   @Override
+  @Transactional
   public void deleteTask(Long id) {
-    transactionUtils.inTransaction(() -> {
-      Task foundTask = taskDao.get(id);
-      if (foundTask == null) {
-        throw new NoSuchElementException();
-      }
-      taskDao.remove(foundTask);
-    });
+    Task foundTask = taskDao.get(id);
+    if (foundTask == null) {
+      throw new NoSuchElementException();
+    }
+    taskDao.remove(foundTask);
   }
 }

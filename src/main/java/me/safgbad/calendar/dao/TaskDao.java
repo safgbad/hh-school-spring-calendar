@@ -4,6 +4,7 @@ import me.safgbad.calendar.model.Task;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.orm.hibernate5.LocalSessionFactoryBean;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -14,8 +15,8 @@ public class TaskDao {
   private final SessionFactory sessionFactory;
 
   @Autowired
-  public TaskDao(SessionFactory sessionFactory) {
-    this.sessionFactory = sessionFactory;
+  public TaskDao(LocalSessionFactoryBean sessionFactory) {
+    this.sessionFactory = sessionFactory.getObject();
   }
 
   public void save(Task task) {

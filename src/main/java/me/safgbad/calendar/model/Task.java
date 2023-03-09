@@ -14,6 +14,7 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.Objects;
 
 @Entity
 @Getter
@@ -43,9 +44,20 @@ public class Task {
   @Column(name = "is_active", nullable = false)
   private Boolean isActive;
 
+  public Task(String summary,
+              Repeatability repeatability,
+              LocalDateTime taskTime,
+              Boolean isActive) {
+    this.summary = summary;
+    this.repeatability = repeatability;
+    this.creationTime = LocalDateTime.now();
+    this.taskTime = taskTime;
+    this.isActive = Objects.requireNonNullElse(isActive, true);
+  }
+
   public boolean checkAvailabilityOnThatDate(LocalDate date) {
     LocalDate taskDate = taskTime.toLocalDate();
-    boolean isTaskBeforeDate = taskDate.equals(date) || taskDate.isBefore(date);
+    boolean isTaskBeforeDate = taskDate.compareTo(date) <= 0;
     if (!isTaskBeforeDate) {
       return false;
     }
